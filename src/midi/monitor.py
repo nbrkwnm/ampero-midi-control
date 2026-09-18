@@ -1,9 +1,10 @@
-```python
 from collections.abc import Callable
+from datetime import datetime
 
 from mido import Message
 
 from .interface import MidiInput
+from .message_formatter import MidiMessageFormatter
 
 class MidiMonitor:
     def __init__(
@@ -12,7 +13,9 @@ class MidiMonitor:
         message_handler: Callable[[Message], None] | None = None,
     ) -> None:
         self._midi_input = midi_input
-        self._message_handler = message_handler or self._default_handler
+        self._message_handler = (
+            message_handler or self._default_handler
+        )
 
     def start(self) -> None:
         if self._midi_input.is_open():
@@ -21,9 +24,11 @@ class MidiMonitor:
         self._midi_input.open()
 
         try:
-            while self._midi_input.is_open():
-                for message in self._midi_input.messages():
-                    self._message_handler(message)
+            for message in self._midi_input.messages():
+                if not self._midi_input.is_open():
+                    break
+
+                self._message_handler(message)
 
         except KeyboardInterrupt:
             pass
@@ -37,9 +42,10 @@ class MidiMonitor:
 
     @staticmethod
     def _default_handler(message: Message) -> None:
+        timestamp = datetime.now().strftime("%H:%M:%S.%f")[:-3]
+        formatted = MidiMessageFormatter.format(message)
+        raw = MidiMessageFormatter.raw(message)
+
         print(
-            f"MIDI RX | "
-            f"type={message.type} | "
-            f"message={message}"
+            f"{timestamp} | RX | {formatted} | RAW={raw}"
         )
-```

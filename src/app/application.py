@@ -1,45 +1,54 @@
-from midi.mido_adapter import MidoDeviceProvider
+from infrastructure.midi.windows_midi import WindowsMidiDeviceProvider
 from midi.monitor import MidiMonitor
-
 
 class Application:
     def __init__(self) -> None:
-        self._midi = MidoDeviceProvider()
+        self._midi = WindowsMidiDeviceProvider()
 
     def run(self) -> int:
-        input_ports = self._midi.input_ports()
+        self._show_midi_devices()
 
-        if not input_ports:
-            print("MIDI port not found.")
-            return 1
+        # selected_index = self._select_input_port(input_ports)
 
-        print("MIDI INPUTS")
+        # if selected_index is None:
+        #     return 1
 
-        for index, port in enumerate(input_ports):
-            print(f"[{index}] {port}")
+        # port_name = input_ports[selected_index]
+        # midi_input = self._midi.create_input(port_name)
 
-        print()
+        # monitor = MidiMonitor(midi_input)
 
-        selected_index = self._select_input_port(input_ports)
+        # print()
+        # print(f"Connecting: {port_name}")
+        # print("Waiting MIDI messages...")
+        # print("Press Ctrl+C to interrupt.")
+        # print()
 
-        if selected_index is None:
-            return 1
-
-        port_name = input_ports[selected_index]
-
-        midi_input = self._midi.create_input(port_name)
-
-        monitor = MidiMonitor(midi_input)
-
-        print()
-        print(f"Connecting: {port_name}")
-        print("Waiting MIDI messages...")
-        print("Press Ctrl+C to interrupt.")
-        print()
-
-        monitor.start()
+        # monitor.start()
 
         return 0
+
+    def _show_midi_devices(self) -> None: 
+        input_ports = self._midi.input_ports() 
+        output_ports = self._midi.output_ports() 
+        
+        if not input_ports:
+            print("MIDI Input port not found.")
+            return 1
+
+        if not output_ports:
+            print("MIDI Output port not found.")
+            return 1
+
+        print("MIDI INPUTS") 
+        for index, port in enumerate(input_ports): 
+            print(f"[{index}] {port}") 
+        
+        print() 
+            
+        print("MIDI OUTPUTS") 
+        for index, port in enumerate(output_ports): 
+            print(f"[{index}] {port}")
 
     @staticmethod
     def _select_input_port(
@@ -62,4 +71,3 @@ class Application:
                 return index
 
             print("Invalid index.")
-```

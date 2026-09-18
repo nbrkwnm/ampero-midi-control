@@ -20,7 +20,6 @@ class MidiInput(ABC):
     def is_open(self) -> bool:
         raise NotImplementedError
 
-
 class MidiOutput(ABC):
     @abstractmethod
     def open(self) -> None:
@@ -37,7 +36,6 @@ class MidiOutput(ABC):
     @abstractmethod
     def is_open(self) -> bool:
         raise NotImplementedError
-
 
 class MidiDeviceProvider(ABC):
     @abstractmethod
@@ -59,4 +57,3 @@ class MidiDeviceProvider(ABC):
     @abstractmethod
     def create_output(self, port_name: str) -> MidiOutput:
         raise NotImplementedError
-```
