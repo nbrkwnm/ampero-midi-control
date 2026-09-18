@@ -3,6 +3,8 @@ from mido import Message
 from ampero.commands import SelectPreset, ToggleEffect
 from ampero.mapping.midi_map import MidiMapping
 from ampero.protocol.base import AmperoProtocol
+from midi.message_factory import MidiMessageFactory
+from midi.message_type import MidiMessageType
 
 class MidiAmperoProtocol(AmperoProtocol):
     def __init__(
@@ -34,14 +36,28 @@ class MidiAmperoProtocol(AmperoProtocol):
                 "Preset MIDI mapping is not configured."
             )
 
-        return [
-            Message(
-                "control_change",
-                channel=self._preset_mapping.channel,
-                control=self._preset_mapping.control,
-                value=command.preset,
-            )
-        ]
+        mapping = self._preset_mapping
+
+        if mapping.message_type == MidiMessageType.CONTROL_CHANGE:
+            return [
+                MidiMessageFactory.control_change(
+                    channel=mapping.channel or 0,
+                    control=mapping.control or 0,
+                    value=command.preset,
+                )
+            ]
+
+        if mapping.message_type == MidiMessageType.PROGRAM_CHANGE:
+            return [
+                MidiMessageFactory.program_change(
+                    channel=mapping.channel or 0,
+                    program=command.preset,
+                )
+            ]
+
+        raise ValueError(
+            "Unsupported MIDI message type for preset."
+        )
 
     def _encode_toggle_effect(
         self,
