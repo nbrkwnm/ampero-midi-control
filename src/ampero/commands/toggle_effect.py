@@ -1,8 +1,12 @@
 from dataclasses import dataclass
 
-from domain.models.effect import EffectType
-
 @dataclass(frozen=True)
 class ToggleEffect:
-    effect: EffectType
+    effect: str
     enabled: bool
+
+    def __post_init__(self) -> None:
+        if not self.effect:
+            raise ValueError(
+                "Effect must not be empty."
+            )
